@@ -1,0 +1,40 @@
+{
+  "name": "vite-plugin-shopify-icons-liquid",
+  "version": "1.0.0",
+  "description": "A Vite plugin that auto-generates a Shopify Liquid snippet with optimized SVG icons.",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "shopify",
+    "icons",
+    "svg",
+    "liquid",
+    "theme",
+    "snippets"
+  ],
+  "author": "João Rocha",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnrock16/vite-plugin-shopify-icons-liquid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnrock16/vite-plugin-shopify-icons-liquid/issues"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "svgo": "^3.2.0"
+  }
+}
