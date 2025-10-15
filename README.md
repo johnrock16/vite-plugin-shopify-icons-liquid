@@ -7,6 +7,7 @@ A lightweight **Vite plugin** that automatically builds a Shopify Liquid snippet
 ## 🚀 Features
 
 - ⚡ **Automatic snippet generation** (`icon.liquid`)
+- 🌟 **Automatic preview generation** (`icon-preview.html`)
 - 🔁 **Incremental rebuilds** (only updates changed icons)
 - 🎨 **SVG optimization** with [SVGO](https://github.com/svg/svgo)
 - 📁 **Supports nested folders** (optional)
@@ -41,7 +42,10 @@ export default {
     VitePluginShopifyIcons({
       inputDirectory: './frontend/icons',    // Folder with SVGs
       outputFile: './snippets/icon.liquid',  // Snippet to generate
-      outputFileJSON: 'icons.json',              // Optional: also generate icons.json
+      outputFileJSON: 'icons.json',          // Optional: also generate icons.json
+      previewFile: 'icon-preview.html',      // HTML to preview your icons
+      preview: true,                         // Enable preview mode
+      openPreview: false,                    // Open preview file automatically
       flattenFolders: true,                  // Include subfolders in icon names
       verbose: true,                         // Show logs
       svgoConfig: {
@@ -139,6 +143,10 @@ When running vite dev, the plugin watches the SVG directory and automatically re
 
 It uses a debounce mechanism (250 ms) to prevent unnecessary rebuilds.
 
+## 🌟 Preview mode
+
+When running vite dev, the plugin creates a preview fille automatically.
+
 ## 🧱 Build mode
 
 During vite build, the plugin automatically generates the snippet once at the beginning of the process.
@@ -165,6 +173,10 @@ my-shopify-theme/
 - Use aria-label for accessibility when icons are interactive.
 
 ## 💬 Changelog
+
+### **1.1.0
+- Preview mode available
+
 ### **1.0.0**
 - Initial release 🎉
 - Supports automatic snippet generation and live rebuilds.

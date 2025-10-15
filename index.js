@@ -2,13 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import { optimize } from 'svgo';
 import chalk from 'chalk';
+import open from 'open';
 
 const DEFAULT_OPTIONS = {
   inputDirectory: './assets',
   outputFile: './snippets/icon.liquid',
   outputFileJSON: '',
+  previewFile: 'icon-preview.html',
   flattenFolders: true,
   verbose: true,
+  preview: true,
+  openPreview: false,
   svgoConfig: {
     multipass: true,
     plugins: [
@@ -20,10 +24,11 @@ const DEFAULT_OPTIONS = {
 
 export default function VitePluginShopifyIcons(userOptions = {}) {
   const options = { ...DEFAULT_OPTIONS, ...userOptions };
-  const { inputDirectory, outputFile, flattenFolders, verbose, outputFileJSON, svgoConfig } = options;
+  const { inputDirectory, outputFile, flattenFolders, verbose, outputFileJSON, previewFile, preview, openPreview, svgoConfig} = options;
 
   const cache = new Map();
   let rebuildTimeout;
+  let previewOpened = false;
 
   function log(message, color = 'green') {
     if (verbose) console.log(chalk[color](`[vite-plugin-shopify-icons] ${message}`));
@@ -49,11 +54,7 @@ export default function VitePluginShopifyIcons(userOptions = {}) {
       return;
     }
 
-    const svgFiles = flattenFolders
-      ? getAllSvgFiles(inputDirectory)
-      : fs.readdirSync(inputDirectory)
-          .filter(f => f.endsWith('.svg'))
-          .map(f => path.join(inputDirectory, f));
+    const svgFiles = flattenFolders ? getAllSvgFiles(inputDirectory) : fs.readdirSync(inputDirectory).filter(f => f.endsWith('.svg')).map(f => path.join(inputDirectory, f));
 
     const icons = [];
 
@@ -133,6 +134,68 @@ export default function VitePluginShopifyIcons(userOptions = {}) {
       fs.writeFileSync(outputFileJSON, JSON.stringify({ icons: list }, null, 2), 'utf8');
       log(`Generated icon list → ${outputFileJSON}`);
     }
+
+    if (preview) buildIconPreview(icons);
+  }
+
+  function buildIconPreview(icons) {
+    if (!icons || icons.length === 0) return;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shopify Icons Preview</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f8f9fa; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    input { padding: 0.5rem 0.75rem; width: 100%; max-width: 400px; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1.5rem; }
+    .icon-card { text-align: center; background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.1s; }
+    .icon-card:hover { transform: scale(1.05); }
+    .icon-card svg { width: 32px; height: 32px; fill: currentColor; margin-bottom: 0.5rem; }
+    .icon-name { font-size: 0.8rem; color: #444; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Shopify Icons Preview (vite-plugin-shopify-icons-liquid)</h1>
+  <input type="text" id="search" placeholder="Search icon..." oninput="filterIcons(this.value)" />
+  <div class="grid">
+    ${icons.map(icon => `
+      <div class="icon-card" data-name="${icon.name}">
+        ${icon.svg}
+        <div class="icon-name">${icon.name}</div>
+      </div>
+    `).join('\n')}
+  </div>
+
+  <script>
+    function filterIcons(q) {
+      document.querySelectorAll('.icon-card').forEach(card => {
+        card.style.display = card.dataset.name.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
+`;
+
+    fs.mkdirSync(path.dirname(previewFile), { recursive: true });
+    fs.writeFileSync(previewFile, html, 'utf8');
+    log(`Generated preview page → ${previewFile}`, 'cyan');
+  }
+
+  function previewInBrowser(serverUrl) {
+    if (previewOpened) return;
+    const previewPath = path.resolve(previewFile);
+    const url = `${serverUrl.replace(/\/$/, '')}/${path.relative(process.cwd(), previewPath)}`;
+    previewOpened = true;
+    log(`Preview available at ${url}`, 'cyan');
+
+    if (openPreview) {
+      open(url);
+    }
   }
 
   function debouncedBuild() {
@@ -157,6 +220,12 @@ export default function VitePluginShopifyIcons(userOptions = {}) {
           log(`Detected change in: ${filePath}`, 'cyan');
           debouncedBuild();
         }
+      });
+
+      server.httpServer?.once('listening', () => {
+        const address = server.httpServer.address();
+        const host = typeof address === 'object' && address?.port ? `http://localhost:${address.port}` : 'http://localhost:5173';
+        previewInBrowser(host);
       });
     },
 
