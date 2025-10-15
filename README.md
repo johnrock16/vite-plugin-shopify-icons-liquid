@@ -78,6 +78,7 @@ When you run Vite, the plugin generates:
 ```markdown
 snippets/
   icon.liquid
+icon-preview.html (if enabled)
 icon.json (if enabled)
 ```
 
@@ -116,7 +117,10 @@ The plugin generates a single snippet containing all icons:
 | ---------------- | --------- | ------------------------------------- | -------------------------------------------------------------------------------------- |
 | `inputDirectory` | `string`  | `'./assets'`                          | Directory containing SVG icons                                                         |
 | `outputFile`     | `string`  | `'./snippets/icon.liquid'`            | Output Liquid snippet path                                                             |
-| `outputFileJSON`     | `boolean` | `false`                               | Generate a JSON file with available icons                                              |
+| `outputFileJSON` | `string`  | `icons.json`                          | Generate a JSON file with available icons                                              |
+| `previewFile`    | `string`  | `icons-preview.html`                  | Generate a HTML file with available icons                                              |
+| `preview`        | `boolean` | `true`                                | Enable preview mode                                                                    |
+| `openPreview`    | `boolean` | `false`                               | Open preview mode automatically                                                        |
 | `flattenFolders` | `boolean` | `true`                                | Include subfolders and flatten paths (e.g. `social/facebook` → `icon-social-facebook`) |
 | `verbose`        | `boolean` | `true`                                | Print detailed build logs                                                              |
 | `svgoConfig`     | `object`  | `{ multipass: true, plugins: [...] }` | Custom [SVGO](https://github.com/svg/svgo) configuration                               |
@@ -174,7 +178,7 @@ my-shopify-theme/
 
 ## 💬 Changelog
 
-### **1.1.0
+### **1.1.0**
 - Preview mode available
 
 ### **1.0.0**

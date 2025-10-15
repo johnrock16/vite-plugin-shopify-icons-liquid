@@ -9,10 +9,10 @@ const DEFAULT_OPTIONS = {
   outputFile: './snippets/icon.liquid',
   outputFileJSON: '',
   previewFile: 'icon-preview.html',
-  flattenFolders: true,
-  verbose: true,
   preview: true,
   openPreview: false,
+  flattenFolders: true,
+  verbose: true,
   svgoConfig: {
     multipass: true,
     plugins: [
